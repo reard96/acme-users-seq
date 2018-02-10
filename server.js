@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 const db = require('./db');
 const nunjucks = require('nunjucks');
 nunjucks.configure({ noCache: true});
@@ -7,16 +8,22 @@ nunjucks.configure({ noCache: true});
 app.set('view engine', 'html');
 app.engine('html', nunjucks.render);
 
-const port = process.env.PORT || 3000;
+app.use('/vendor', express.static(path.join(__dirname, 'node_modules')));
+app.use(require('method-override'))
 
-app.listen(port, () => console.log(`listening on port ${port}`));
+app.use((req, res, next) => {
+  res.locals.path = req.url;
+  next();
+});
+
+const port = process.env.PORT || 3000;
 
 app.get('/', (req, res, next) => {
   res.render('index', { title: 'Home' });
 });
 
-const returnError = app.get('/error', (req, res, next) => {
-  res.render('error', { title: 'Error'});
+app.use((err, req, res, next) => {
+  res.render('error', { error: err, title: 'Error' });
 });
 
 app.use('/users', require('./routes/users.js'));

@@ -1,16 +1,22 @@
 const pg = require('pg');
+const sql = require('sequelize');
 
-const client = new pg.Client(process.env.DATABASE_URL);
+const client = new sql(process.env.DATABASE_URL);
 
-client.connect();
+const users = client.define('user', {
+  name: {
+    type: Sequelize.STRING,
+    unique: true,
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
+  }
+});
 
-const SQL_SYNC = `
-  DROP TABLE IF EXISTS users;
-  CREATE TABLE users(
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255)
-  );
-`;
+const sync = () => {
+  return client.sync({ force: true });
+}
 
 const SQL_SEED = `
   INSERT INTO users(name) values('superman');
@@ -18,7 +24,7 @@ const SQL_SEED = `
   INSERT INTO users(name) values('spiderman');
 `;
 
-const seed = (cb) => {
+const seed = () => {
   client.query(SQL_SEED, cb);
 };
 
