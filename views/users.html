@@ -1,4 +1,10 @@
 {% extends './layout.html' %}
 {% block content %}
-Tweet Page Content
+  <ul>
+    {% for user in users %}
+      <li>
+        <a href='/users/{{ users.id }}'>{{ users.name }</a>
+      </li>
+    {% endfor %}
+  </ul>
 {% endblock %}

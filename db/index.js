@@ -38,11 +38,11 @@ const getUser = (id, cb) => {
     if (err) return cb(err);
     cb(null, result.rows.length ? result.rows[0] : null);
   });
-}
+};
 
 module.exports = {
+  seed,
   sync,
   getUsers,
-  seed,
   getUser
 };

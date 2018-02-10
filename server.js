@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const db = require('./db');
 const nunjucks = require('nunjucks');
 nunjucks.configure({ noCache: true});
 
@@ -14,31 +15,28 @@ app.get('/', (req, res, next) => {
   res.render('index', { title: 'Home' });
 });
 
-app.get('/users', (req, res, next) => {
-  db.getUsers((err, users) => {
-    if (err) return next(err);
-    res.send(users);
-  });
+const returnError = app.get('/error', (req, res, next) => {
+  res.render('error', { title: 'Error'});
 });
 
-app.get('/users/:id', (req, res, next) => {
-  db.getUser(req.params.id, (err, user) => {
-    if (err) return next(err);
-    res.send(user);
-  });
-});
-
-const db = require('./db');
+app.use('/users', require('./routes/users.js'));
 
 db.sync((err) => {
-  if (err) return console.log(err);
+  if (err) {
+    return returnError;
+  }
   db.getUsers ((err, users) => {
-    if (err) return console.log(err);
-    console.log(`there are ${users.length} users`);
+    if (err) {
+      return returnError;
+    }
     db.seed((err) => {
-      if (err) return console.log(err);
+      if (err) {
+        return returnError;
+      }
       db.getUsers((err, users) => {
-        if (err) return console.log(err);
+        if (err) {
+          return returnError;
+        }
         console.log(`there are ${users.length} users`);
         db.getUser(2, (err, user) => {
           if (err) return console.log(err);
